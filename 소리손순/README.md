@@ -77,3 +77,7 @@
     </tr>
   </tbody>
 </table>
+
+### 발표자료
+[[4조] 소리손순 최종 발표.pptx](https://github.com/user-attachments/files/18382058/4.pptx)
+
