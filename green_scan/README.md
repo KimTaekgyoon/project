@@ -72,3 +72,7 @@
 5. 분석 결과는 JSON 형태로 Spring Boot 서버를 통해 Flutter UI에 전달됩니다.
 6. 사용자에게 실시간으로 결과가 표시됩니다.
 
+## 5. 시연 영상
+https://github.com/user-attachments/assets/0ccb7998-5ad2-4194-9f48-37d1522e7487
+
+
