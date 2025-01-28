@@ -81,8 +81,10 @@
 ### 🗣️발표자료
 [[4조] 소리손순 최종 발표.pptx](https://github.com/user-attachments/files/18382058/4.pptx)
 
+
 ### 배포 아키텍처
 ![image](https://github.com/user-attachments/assets/21f2e3a5-4243-401a-9d94-312f2d9756c9)
+
 
 
 ### ⏯️ 시연 영상
