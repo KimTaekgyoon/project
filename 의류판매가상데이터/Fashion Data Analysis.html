@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가상 의류 판매 플랫폼 데이터 분석</title>
+</head>
+<body style="background-color: #f8f9fa; font-family: 'Helvetica Neue', sans-serif; padding: 2rem; line-height: 1.6; max-width: 1200px; margin: 0 auto; color: #333;">
+
+<h1 style="color: #003366; font-size: 2.5rem; text-align: center;">가상 의류 판매 플랫폼 데이터 분석</h1>
+<p style="font-size: 1.25rem; margin-top: 1rem; text-align: center;">AARRR 프레임워크 활용 SQL 기반 의류 이커머스 고객 여정 분석과 전략 수립</p>
+
+<hr style="border: 1px solid #003366; margin: 2rem 0;">
+
+<h2 style="color: #003366;">01. 프로젝트 배경 및 목적</h2>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+  <p style="font-size: 1.1rem;">이 프로젝트는 SQL을 활용한 이커머스 플랫폼 데이터 분석을 위하여 가상의 데이터를 직접 설계하여 분석까지 진행한 사례로 <b> "실무에서 사용되는 이커머스 데이터를 구하기 어렵다면 직접 만들어보자"</b>는 생각에서 출발했습니다.</p>
+
+  <h3 style="color: #003366; margin-top: 1.5rem;">프로젝트 환경</h3>
+  <ul style="font-size: 1.1rem;">
+    <li><b>데이터 생성:</b> Python Faker 라이브러리를 활용하여 GA4 전환 지표 구조를 반영한 데이터 생성</li>
+    <li><b>분석 도구:</b> PostgreSQL 활용 SQL 기반 분석</li>
+    <li><b>분석 프레임워크:</b> AARRR (Acquisition, Activation, Revenue, Retention, Referral)</li>
+  </ul>
+</div>
+
+<h3 style="color: #003366;">테이블 구조</h3>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+    <div style="width: 48%;">
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>user_profile:</b> 유저 관련 정보 (유입 채널, CAC, 가입 여부 등)</p>
+      </div>
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>purchase:</b> 구매 이력 (구매 시점, 수량, 반복 구매 여부 등)</p>
+      </div>
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>products:</b> 제품 정보 (카테고리, 가격, 재고, 리뷰 등)</p>
+      </div>
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>active_event:</b> 장바구니, 결제 시도, 이탈 이벤트 등</p>
+      </div>
+    </div>
+    <div style="width: 48%;">
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>referral:</b> 추천 활동 및 추천인-피추천인 관계</p>
+      </div>
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>returns:</b> 반품 및 교환 이력</p>
+      </div>
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>retention:</b> 리텐션 지표 및 이탈 시그널</p>
+      </div>
+      <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin: 0;"><b>session:</b> 접속 세션 및 디바이스 정보</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<h2 style="color: #003366;">02. 문제 인식: "채널마다 유저의 행동이 왜 이렇게 다른가?"</h2>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+  <p style="font-size: 1.1rem;">고객 유입 데이터를 분석하던 중, Referral 채널과 SNS 채널에서 논리적이지 않은 패턴들이 관찰되었습니다.</p>
+
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 1.5rem;">
+    <div style="width: 48%; background-color: #e6f0ff; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+      <h4 style="color: #003366; margin-top: 0;">Referral 채널의 특이점</h4>
+      <ul style="font-size: 1.05rem;">
+        <li>광고비가 거의 들지 않음</li>
+        <li>유입 고객의 <b>구매 전환율이 가장 높음</b></li>
+        <li>그런데도 <b>회원가입률은 매우 낮음</b></li>
+      </ul>
+    </div>
+    <div style="width: 48%; background-color: #e6f0ff; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+      <h4 style="color: #003366; margin-top: 0;">SNS 채널의 특이점</h4>
+      <ul style="font-size: 1.05rem;">
+        <li>유입량이 가장 많음</li>
+        <li><b>회원가입 전환율도 높았음</b></li>
+        <li>그러나 <b>실제 구매 전환율은 낮음</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="color: #003366; margin-top: 1.5rem;">탐색 질문</h3>
+    <ol style="font-size: 1.1rem;">
+      <li>왜 Referral 채널은 가입은 적은데 구매 전환이 높을까?</li>
+      <li>왜 SNS 채널은 가입은 잘 되는데 실제 구매로 이어지지 않을까?</li>
+      <li>이 두 채널의 유저는 유입 후 어떤 행동 흐름을 보일까?</li>
+    </ol>
+
+    <!-- 🔽 화살표 추가 -->
+    <div style="text-align: center; font-size: 2rem; margin: 1rem 0;">↓</div>
+
+    <!-- ✨ 추가된 연결 문단 (굵은 글씨) -->
+    <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+      <p style="font-size: 1.1rem; font-weight: bold; margin: 0;">
+        고객의 전체 여정을 구조적으로 분석할수 있는 AARRR 프레임워크를 기반으로 분석해보자!
+      </p>
+    </div>
+  </div>
+
+
+
+
+
+<h2 style="color: #003366;">03. 분석 시나리오 흐름 (AARRR)</h2>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-around; background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+  <div style="width: 18%; min-width: 150px; text-align: center; margin-bottom: 1.5rem;">
+    <div style="background-color: #003366; color: white; border-radius: 50%; width: 100px; height: 100px; line-height: 100px; font-size: 1.2rem; margin: 0 auto;">Acquisition</div>
+    <p style="margin-top: 0.8rem; font-weight: bold;">유입 분석</p>
+    <p style="font-size: 0.9rem;">채널별 유입 효율 비교</p>
+  </div>
+  <div style="width: 18%; min-width: 150px; text-align: center; margin-bottom: 1.5rem;">
+    <div style="background-color: #003366; color: white; border-radius: 50%; width: 100px; height: 100px; line-height: 100px; font-size: 1.2rem; margin: 0 auto;">Activation</div>
+    <p style="margin-top: 0.8rem; font-weight: bold;">퍼널 분석</p>
+    <p style="font-size: 0.9rem;">가입→장바구니→결제→구매</p>
+  </div>
+  <div style="width: 18%; min-width: 150px; text-align: center; margin-bottom: 1.5rem;">
+    <div style="background-color: #003366; color: white; border-radius: 50%; width: 100px; height: 100px; line-height: 100px; font-size: 1.2rem; margin: 0 auto;">Revenue</div>
+    <p style="margin-top: 0.8rem; font-weight: bold;">수익 분석</p>
+    <p style="font-size: 0.9rem;">AOV 및 CLTV 측정</p>
+  </div>
+  <div style="width: 18%; min-width: 150px; text-align: center; margin-bottom: 1.5rem;">
+    <div style="background-color: #003366; color: white; border-radius: 50%; width: 100px; height: 100px; line-height: 100px; font-size: 1.2rem; margin: 0 auto;">Retention</div>
+    <p style="margin-top: 0.8rem; font-weight: bold;">재구매 분석</p>
+    <p style="font-size: 0.9rem;">채널별 충성도 비교</p>
+  </div>
+  <div style="width: 18%; min-width: 150px; text-align: center; margin-bottom: 1.5rem;">
+    <div style="background-color: #003366; color: white; border-radius: 50%; width: 100px; height: 100px; line-height: 100px; font-size: 1.2rem; margin: 0 auto;">Referral</div>
+    <p style="margin-top: 0.8rem; font-weight: bold;">추천 효과</p>
+    <p style="font-size: 0.9rem;">추천자별 매출 기여도</p>
+  </div>
+</div>
+
+<h2 style="color: #003366;">04. 분석 결과 및 인사이트</h2>
+
+<h3 style="color: #003366; margin-top: 2rem;">1. Acquisition - 유입 채널 효율성 분석</h3>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+    <div style="width: 48%;">
+      <h4 style="color: #003366;">SQL 분석 내용</h4>
+      <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 5px; font-family: monospace; font-size: 0.9rem;">
+        SELECT<br>
+        &nbsp;&nbsp;channel,<br>
+        &nbsp;&nbsp;count(user_id) as users_acquired,<br>
+        &nbsp;&nbsp;round(sum(cac)::numeric,2) as total_cac,<br>
+        &nbsp;&nbsp;round(sum(cac)::numeric / nullif(count(user_id),0),2) as avg_cac_per_user<br>
+        FROM user_profile<br>
+        WHERE channel IS NOT NULL<br>
+        GROUP BY channel<br>
+        ORDER BY avg_cac_per_user ASC;
+      </div>
+    </div>
+    <div style="width: 48%;">
+      <h4 style="color: #003366;">주요 발견</h4>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <thead>
+          <tr style="background-color: #003366; color: white;">
+            <th style="padding: 0.8rem; text-align: left; border: 1px solid #ddd;">채널</th>
+            <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">유입 수</th>
+            <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">CAC(평균)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 0.8rem; border: 1px solid #ddd;">Referral</td>
+            <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2,014</td>
+            <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">29.47</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.8rem; border: 1px solid #ddd;">SNS</td>
+            <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2,071</td>
+            <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">29.83</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div style="margin-top: 1.5rem; background-color: #e6f0ff; padding: 1rem; border-radius: 10px;">
+    <h4 style="color: #003366; margin-top: 0;">인사이트</h4>
+    <ul style="font-size: 1.05rem;">
+      <li><b>비용 효율이 거의 동일함:</b> CAC에 대해서 Referral이 SNS보다 0.36 낮으나 차이가 별로 없음</li>
+      <li><b>비용보다 행동에 주목:</b> “비용 효율” 뿐만 아니라 “행동 효율”을 살펴볼 필요가 있음</li>
+    </ul>
+    <p style="margin-top: 1rem; font-size: 1.05rem;">
+      CAC 비용 차이는 크지 않기에 유입 이후 행동에 차이가 존재하는지 확인하기 위해서 회원가입 전환률 추가 분석
+    </p>
+  </div>
+</div>
+
+
+<h3 style="color: #003366;">2. Conversion - 회원가입 전환률 분석</h3>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">SQL 코드</h4>
+    <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 5px; font-family: monospace; font-size: 0.9rem;">
+      SELECT<br>
+      &nbsp;&nbsp;channel,<br>
+      &nbsp;&nbsp;count(user_id) as total_users,<br>
+      &nbsp;&nbsp;sum(CASE WHEN is_signup THEN 1 ELSE 0 END) as signed_up_users,<br>
+      &nbsp;&nbsp;round(sum(CASE WHEN is_signup THEN 1 ELSE 0 END)::numeric / count(user_id), 2) as signup_cvr<br>
+      FROM user_profile<br>
+      WHERE channel IS NOT NULL<br>
+      GROUP BY channel<br>
+      ORDER BY signup_cvr DESC;
+    </div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">주요 발견</h4>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+      <thead>
+        <tr style="background-color: #003366; color: white;">
+          <th style="padding: 0.8rem; text-align: left; border: 1px solid #ddd;">채널</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">전체 유입 수</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">가입 수</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">가입 전환율</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">SNS</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2,071</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">936</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">45%</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">Referral</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2,014</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">201</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">10%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 10px;">
+    <h4 style="color: #003366;">인사이트</h4>
+    <ul style="font-size: 1.05rem;">
+      <li><b>SNS 채널:</b> 회원가입 전환율이 매우 높음 (45%). 유입 후 가입은 잘 이뤄지고 있음</li>
+      <li><b>Referral 채널:</b> 회원가입 전환율이 매우 낮음 (10%). 진입 장벽이 존재하거나 추가 설득 요소 필요</li>
+      <li><b>전략 제안:</b> Referral 채널에 대해 소셜 로그인, 즉시 할인 쿠폰 제공 등 가입 전환 유도 필요</li>
+    </ul>
+    <p style="margin-top: 1rem; font-size: 1.05rem;">
+        이 논리적이지 않은 패턴을 해석하고 대응하기 위해, 채널별 퍼널 분석을 이어서 진행함
+      </p>
+  </div>
+</div>
+
+
+<h3 style="color: #003366;">3. Activation - 퍼널 단계별 이탈 분석</h3>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">SQL 코드</h4>
+    <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 5px; font-family: monospace; font-size: 0.9rem; overflow-x: auto;">
+WITH base_users AS (<br>
+&nbsp;&nbsp;SELECT user_id, channel<br>
+&nbsp;&nbsp;FROM user_profile<br>
+&nbsp;&nbsp;WHERE signed_up = true<br>
+),<br>
+funnel_flags AS (<br>
+&nbsp;&nbsp;SELECT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;au.user_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;channel,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COALESCE(added_to_cart, false) AS added_to_cart,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COALESCE(checkout_started, false) AS checkout_started<br>
+&nbsp;&nbsp;FROM base_users au<br>
+&nbsp;&nbsp;LEFT JOIN active_event ae ON au.user_id = ae.user_id<br>
+),<br>
+purchase_flags AS (<br>
+&nbsp;&nbsp;SELECT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bu.user_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bu.channel,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f.added_to_cart,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f.checkout_started,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CASE WHEN p.user_id IS NOT NULL THEN true ELSE false END AS purchased<br>
+&nbsp;&nbsp;FROM funnel_flags f<br>
+&nbsp;&nbsp;JOIN base_users bu ON f.user_id = bu.user_id<br>
+&nbsp;&nbsp;LEFT JOIN purchase p ON f.user_id = p.user_id<br>
+),<br>
+channel_funnel AS (<br>
+&nbsp;&nbsp;SELECT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;channel,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COUNT(DISTINCT user_id) AS total_users,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COUNT(DISTINCT user_id) FILTER (WHERE added_to_cart) AS added_to_cart_users,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COUNT(DISTINCT user_id) FILTER (WHERE checkout_started) AS checkout_started_users,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COUNT(DISTINCT user_id) FILTER (WHERE purchased) AS purchased_users<br>
+&nbsp;&nbsp;FROM purchase_flags<br>
+&nbsp;&nbsp;GROUP BY channel<br>
+)<br>
+SELECT<br>
+&nbsp;&nbsp;channel,<br>
+&nbsp;&nbsp;total_users,<br>
+&nbsp;&nbsp;added_to_cart_users,<br>
+&nbsp;&nbsp;checkout_started_users,<br>
+&nbsp;&nbsp;purchased_users,<br>
+&nbsp;&nbsp;ROUND(100.0 * (total_users - added_to_cart_users)::numeric / total_users, 2) AS drop_rate_after_signup,<br>
+&nbsp;&nbsp;ROUND(100.0 * (added_to_cart_users - checkout_started_users)::numeric / added_to_cart_users, 2) AS drop_rate_after_cart,<br>
+&nbsp;&nbsp;ROUND(100.0 * (checkout_started_users - purchased_users)::numeric / checkout_started_users, 2) AS drop_rate_after_checkout<br>
+FROM channel_funnel<br>
+ORDER BY channel;
+    </div>
+  </div>
+
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">주요 발견</h4>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+      <thead>
+        <tr style="background-color: #003366; color: white;">
+          <th style="padding: 0.8rem; text-align: left; border: 1px solid #ddd;">채널</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">가입</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">장바구니</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">결제화면 진입</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">구매 완료</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">SNS</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">936</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">625</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">369</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">155</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">Referral</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">201</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">182</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">165</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">76</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 10px;">
+    <h4 style="color: #003366;">인사이트</h4>
+    <ul style="font-size: 1.05rem;">
+      <li><b>SNS 채널:</b> 가입 이후 장바구니 단계까지 33% 이탈, 장바구니 ➔ 결제화면 이동 시 41% 추가 이탈 발생</li>
+      <li><b>Referral 채널:</b> 가입 이후 퍼널 이탈이 매우 적고, 구매 완료율이 높음</li>
+      <li><b>전략 제안:</b> SNS 채널에 대해 제품 상세 콘텐츠 강화 및 결제 UI/UX 간소화 필요</li>
+    </ul>
+    <p style = "margin-top: 1rem; font-size: 1.05rem;">
+        퍼널 단계별 이탈 차이를 확인했으니, 실제 수익성(AOV, CLTV) 차이를 검증해야 함
+    </p>
+  </div>
+</div>
+
+
+
+<h3 style="color: #003366;">4. Revenue - 채널별 수익 분석</h3>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">SQL 코드</h4>
+    <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 5px; font-family: monospace; font-size: 0.9rem; overflow-x: auto;">
+WITH purchase_detail AS (<br>
+&nbsp;&nbsp;SELECT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;p.user_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;up.channel,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pr.price,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;p.product_count,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(pr.price * p.product_count) AS order_total<br>
+&nbsp;&nbsp;FROM purchase p<br>
+&nbsp;&nbsp;JOIN user_profile up ON p.user_id = up.user_id<br>
+&nbsp;&nbsp;JOIN products pr ON p.user_id = pr.user_id<br>
+),<br>
+channel_stats AS (<br>
+&nbsp;&nbsp;SELECT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;channel,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COUNT(*) AS total_orders,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;COUNT(DISTINCT user_id) AS unique_customers,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;SUM(order_total) AS total_revenue<br>
+&nbsp;&nbsp;FROM purchase_detail<br>
+&nbsp;&nbsp;GROUP BY channel<br>
+)<br>
+SELECT<br>
+&nbsp;&nbsp;channel,<br>
+&nbsp;&nbsp;total_orders,<br>
+&nbsp;&nbsp;unique_customers,<br>
+&nbsp;&nbsp;ROUND(total_revenue::numeric / NULLIF(total_orders, 0), 2) AS aov,<br>
+&nbsp;&nbsp;ROUND(total_revenue::numeric / NULLIF(unique_customers, 0), 2) AS cltv<br>
+FROM channel_stats<br>
+ORDER BY total_orders DESC;
+    </div>
+  </div>
+
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">주요 발견</h4>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+      <thead>
+        <tr style="background-color: #003366; color: white;">
+          <th style="padding: 0.8rem; text-align: left; border: 1px solid #ddd;">채널</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">평균 주문 금액 (AOV)</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">고객 생애 가치 (CLTV)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">SNS</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">78,000</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">186,000</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">Referral</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">43,000</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">95,000</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 10px;">
+    <h4 style="color: #003366;">인사이트</h4>
+    <ul style="font-size: 1.05rem;">
+      <li><b>SNS 채널:</b> 평균 주문 금액(AOV)과 고객 생애 가치(CLTV) 모두 가장 높음. 프리미엄 제품 소비 성향 뚜렷</li>
+      <li><b>Referral 채널:</b> 전환율은 우수하지만 AOV와 CLTV는 상대적으로 낮음. 낮은 가격대 제품 소비 경향</li>
+      <li><b>전략 제안:</b> SNS 채널은 프리미엄 제품 중심 강화, Referral은 추천 제품을 고가 상품군으로 유도</li>
+    </ul>
+    <p style = "margin-top: 1rem; font-size: 1.05rem;">
+        1회성 매출보다 고객 재구매율이 더 중요하므로 재구매 분석 필요
+    </p>
+  </div>
+
+</div>
+
+
+<h3 style="color: #003366;">5. Retention - 재구매 분석</h3>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">SQL 코드</h4>
+    <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 5px; font-family: monospace; font-size: 0.9rem; overflow-x: auto;">
+WITH customer_repeat_status AS (<br>
+&nbsp;&nbsp;SELECT DISTINCT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;p.user_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;up.channel,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;p.repeat_customer<br>
+&nbsp;&nbsp;FROM purchase p<br>
+&nbsp;&nbsp;JOIN user_profile up ON p.user_id = up.user_id<br>
+)<br>
+SELECT<br>
+&nbsp;&nbsp;channel,<br>
+&nbsp;&nbsp;COUNT(*) AS total_buyers,<br>
+&nbsp;&nbsp;COUNT(*) FILTER (WHERE repeat_customer) AS repeat_buyers,<br>
+&nbsp;&nbsp;ROUND(100.0 * COUNT(*) FILTER (WHERE repeat_customer)::numeric / NULLIF(COUNT(*), 0), 2) AS repeat_purchase_rate_percent<br>
+FROM customer_repeat_status<br>
+GROUP BY channel<br>
+ORDER BY repeat_purchase_rate_percent DESC;
+    </div>
+  </div>
+
+
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">주요 발견</h4>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+      <thead>
+        <tr style="background-color: #003366; color: white;">
+          <th style="padding: 0.8rem; text-align: left; border: 1px solid #ddd;">채널</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">전체 유저 수</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">재구매 유저 수</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">재구매율</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">SNS</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2,071</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">1,056</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">51%</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">Referral</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2,014</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">725</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">36%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 10px;">
+    <h4 style="color: #003366;">인사이트</h4>
+    <ul style="font-size: 1.05rem;">
+      <li><b>SNS 채널:</b> 전체 재구매율 51%로 가장 높음. 특히 '상의' 제품군 첫 구매자의 재구매율이 탁월함</li>
+      <li><b>Referral 채널:</b> 초기 구매 전환은 우수하지만, 장기 리텐션 성과는 비교적 약함</li>
+      <li><b>전략 제안:</b> SNS 채널 타겟팅 리마케팅 강화, Referral 유저 대상 장기 혜택 제공 필요</li>
+    </ul>
+    <p style = "margin-top: 1rem; font-size: 1.05rem;">
+      채널 별 고객 충성도를 확인했으니, 고객 별로 어떤 추천 성과를 내는지를 파악하기 위해 추천 채널의 전환 효율 분석을 진행
+    </p>
+  </div>
+
+</div>
+
+
+<h3 style="color: #003366;">6. Referral - 추천 효과 분석</h3>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">SQL 코드</h4>
+    <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 5px; font-family: monospace; font-size: 0.9rem; overflow-x: auto;">
+WITH top_referrers AS (<br>
+&nbsp;&nbsp;SELECT referrer_id<br>
+&nbsp;&nbsp;FROM referral<br>
+&nbsp;&nbsp;WHERE referrer_id IS NOT NULL<br>
+&nbsp;&nbsp;GROUP BY referrer_id<br>
+&nbsp;&nbsp;ORDER BY COUNT(user_id) DESC<br>
+&nbsp;&nbsp;LIMIT 5<br>
+),<br>
+referral_links AS (<br>
+&nbsp;&nbsp;SELECT user_id, referrer_id<br>
+&nbsp;&nbsp;FROM referral<br>
+&nbsp;&nbsp;WHERE referrer_id IN (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;SELECT referrer_id FROM top_referrers<br>
+&nbsp;&nbsp;)<br>
+),<br>
+referral_purchases AS (<br>
+&nbsp;&nbsp;SELECT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rl.referrer_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;p.user_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;SUM(pr.price * p.product_count) AS user_total_spent<br>
+&nbsp;&nbsp;FROM referral_links rl<br>
+&nbsp;&nbsp;JOIN purchase p ON rl.user_id = p.user_id<br>
+&nbsp;&nbsp;JOIN products pr ON p.user_id = pr.user_id<br>
+&nbsp;&nbsp;GROUP BY rl.referrer_id, p.user_id<br>
+)<br>
+SELECT<br>
+&nbsp;&nbsp;referrer_id,<br>
+&nbsp;&nbsp;ROUND(SUM(user_total_spent)::numeric, 2) AS total_revenue_from_referrals,<br>
+&nbsp;&nbsp;COUNT(DISTINCT user_id) AS converted_users<br>
+FROM referral_purchases<br>
+GROUP BY referrer_id<br>
+ORDER BY total_revenue_from_referrals DESC;
+    </div>
+  </div>
+
+
+
+  <div style="margin-bottom: 1.5rem;">
+    <h4 style="color: #003366;">주요 발견</h4>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+      <thead>
+        <tr style="background-color: #003366; color: white;">
+          <th style="padding: 0.8rem; text-align: left; border: 1px solid #ddd;">추천자 ID</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">총 추천 수</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">구매 완료 수</th>
+          <th style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">총 매출 기여</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">user_005146</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">2,110.22</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.8rem; border: 1px solid #ddd;">user_004929</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">15</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">3</td>
+          <td style="padding: 0.8rem; text-align: right; border: 1px solid #ddd;">798.45</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 10px;">
+    <h4 style="color: #003366;">인사이트</h4>
+    <ul style="font-size: 1.05rem;">
+      <li><b>user_005146:</b> 추천 수는 적지만, 전환율이 매우 높아 높은 매출을 만들어냄</li>
+      <li><b>user_004929:</b> 추천 수는 많았으나, 실제 구매로 이어지는 전환율은 낮음</li>
+      <li><b>전략 제안:</b> 추천 수 기반 보상 체계에서 구매 실적 기반 보상 체계로 전환 필요. 전환율 높은 추천자를 별도로 육성하는 인센티브 프로그램 도입 고려</li>
+    </ul>
+  </div>
+
+</div>
+
+
+
+<h2 style="color: #003366;">07. 최종 결론 및 전략 제언</h2>
+<div style="background-color: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 1.1rem; line-height: 1.7;">
+
+  <p><b>Referral과 SNS 채널</b>의 고객 행동 흐름은 유의미한 차이를 보였습니다.</p>
+
+  <h4 style="color: #003366; margin-top: 1.5rem;">Referral 채널 요약</h4>
+  <ul>
+    <li><b>가입 전환율:</b> 낮음 (가입 진입 장벽 존재)</li>
+    <li><b>구매 전환율:</b> 매우 높음 (퍼널 이탈 거의 없음)</li>
+    <li><b>원인:</b> 추천 기반 유입 특성상 신뢰도가 높은 고객 유입</li>
+  </ul>
+
+  <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">
+    <b style="color: #003366;">Referral 채널 전략 제안</b>
+    <ul style="margin: 0;">
+      <li>소셜 로그인 도입 → 가입 장벽 해소</li>
+      <li>가입 시 즉시 혜택 제공 (예: 할인 쿠폰)</li>
+      <li>추천 보상 기준: <b>‘추천 수’ → ‘구매 실적’</b>으로 전환</li>
+    </ul>
+  </div>
+
+  <h4 style="color: #003366; margin-top: 2rem;">SNS 채널 요약</h4>
+  <ul>
+    <li><b>가입 전환율:</b> 높음 (많은 유입과 가입 유도 성공)</li>
+    <li><b>구매 전환율:</b> 낮음 (장바구니 진입 전 이탈률 33%, 결제화면 진입 전 이탈률 41%)</li>
+    <li><b>원인:</b> 충동 유입 + 제품 확신 부족 + 결제 UI/UX 불편</li>
+  </ul>
+
+  <div style="background-color: #e6f0ff; padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">
+    <b style="color: #003366;">SNS 채널 전략 제안</b>
+    <ul style="margin: 0;">
+      <li>상품 상세 콘텐츠 보강 (후기, 실착 이미지, Q&A)</li>
+      <li>결제 단계 UI/UX 간소화 및 정보 신뢰도 강화</li>
+      <li>배송·할인·보장 관련 정보 사전 제공</li>
+    </ul>
+  </div>
+
+</div>
+
+</body>
+</html>
