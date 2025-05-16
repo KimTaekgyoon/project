@@ -74,5 +74,6 @@
 
 ---
 
-관련 자료
+## 관련 자료
+
 [아르바이트 식당 매출 변화 원인 분석.pdf](https://github.com/user-attachments/files/20238418/_._._._._.pdf)
