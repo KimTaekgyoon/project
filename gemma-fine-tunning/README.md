@@ -20,5 +20,6 @@ Fine-tuning된 모델은 Hugging Face Hub에서 다운로드할 수 있습니다
 - [gemma-2b-math-korean-finetuned 모델 다운로드](https://huggingface.co/rlatg0123/gemma-2b-math-korean-finetuned/resolve/main/adapter_model.safetensors)
 
 ## 제출 보고서
-- [AI 수학 선생님 아이디어 보고서](https://github.com/user-attachments/files/18228904/_AI.pdf)
+- [AI 수학 선생님 아이디어 보고서](https://github.com/user-attachments/files/20241694/_AI.pdf)
+
 
