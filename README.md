@@ -10,7 +10,8 @@
 | 2025.04 - 2025.05| 아르바이트식당매출변화원인분석 |  |[아르바이트식당매출변화원인분석](https://github.com/KimTaekgyoon/project/tree/main/%EC%95%84%EB%A5%B4%EB%B0%94%EC%9D%B4%ED%8A%B8%EC%8B%9D%EB%8B%B9%EB%A7%A4%EC%B6%9C%EB%B3%80%ED%99%94%EC%9B%90%EC%9D%B8%EB%B6%84%EC%84%9D)|
 
 
+---
+## Tableau Public 대시보드
 
--------------------------------------------------------------------------
-### Tableau Public
-https://public.tableau.com/app/profile/taekgyoon.kim/vizzes
+- 다양한 분석 결과를 Tableau Public에 시각화하여 공유하고 있습니다.  
+- [Tableau Public 프로필 바로가기](https://public.tableau.com/app/profile/taekgyoon.kim/vizzes)
