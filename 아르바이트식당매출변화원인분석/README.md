@@ -76,4 +76,4 @@
 
 ## 관련 자료
 
-[아르바이트_식당_매출_하락_원인_분석.pdf](https://github.com/user-attachments/files/20768155/_._._._._.pdf)
+[아르바이트 식당 매출 하락 원인 분석.pdf](https://github.com/user-attachments/files/20768155/_._._._._.pdf)
